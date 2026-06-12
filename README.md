@@ -2,7 +2,7 @@
 
 A machine learning pipeline that detects phishing URLs with near-perfect accuracy using the PhiUSIIL dataset. Built as a portfolio project combining data analytics, cybersecurity, and machine learning.
 
-**[View Power BI Dashboard](https://app.powerbi.com/groups/me/reports/572f2591-44eb-48ce-aae9-12372c3e4466/07c49e12d54b38356ec0?experience=power-bi)**
+**[View Power BI Dashboard](https://app.powerbi.com/view?r=eyJrIjoiMzkzYmFmZmMtYTRhYy00YTUxLTg2MjQtZjQzOWU1OGQ3ODk0IiwidCI6IjYwOTU2ODg0LTEwYWQtNDBmYS04NjNkLTRmMzJjMWUzYTM3YSIsImMiOjF9)**
 
 ---
 
