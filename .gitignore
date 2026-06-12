@@ -1,0 +1,4 @@
+data/
+exports/*.pkl
+__pycache__/
+*.pyc
