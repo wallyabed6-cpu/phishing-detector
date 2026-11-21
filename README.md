@@ -2,7 +2,7 @@
 
 A machine learning pipeline that classifies phishing URLs using the PhiUSIIL dataset (235,795 URLs), with an honest look at **why the scores are so high** and what's left once you remove the dataset's shortcuts. It combines data analytics, cybersecurity and machine learning, and ends in a Power BI dashboard.
 
-**[View Power BI Dashboard](https://app.powerbi.com/view?r=eyJrIjoiMzkzYmFmZmMtYTRhYy00YTUxLTg2MjQtZjQzOWU1OGQ3ODk0IiwidCI6IjYwOTU2ODg0LTEwYWQtNDBmYS04NjNkLTRmMzJjMWUzYTM3YSIsImMiOjF9)**
+**[View Power BI Dashboard](https://app.powerbi.com/view?r=eyJrIjoiYjk2MDUwMzQtY2E1Mi00ZTcxLThiMWMtOGU2MWUxMjU1NjEwIiwidCI6IjYwOTU2ODg0LTEwYWQtNDBmYS04NjNkLTRmMzJjMWUzYTM3YSIsImMiOjF9)**
 
 ---
 
