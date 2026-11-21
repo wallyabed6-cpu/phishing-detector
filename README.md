@@ -22,6 +22,16 @@ Three approaches, scored on the same 47,159-URL test set (20,189 phishing, 26,97
 
 ---
 
+## Dashboard
+
+**Page 1: how good is it, really?** Three approaches compared on the same test set.
+![Model comparison](docs/screenshots/1_comparison.png)
+
+**Page 2: what the models learned, and what they missed.**
+![Drivers and misses](docs/screenshots/2_drivers.png)
+
+---
+
 ## Dataset
 
 **[PhiUSIIL Phishing URL Dataset](https://archive.ics.uci.edu/dataset/967/phiusiil+phishing+url+dataset)** (UCI; Prasad & Chandra, *Computers & Security*, 2023)
