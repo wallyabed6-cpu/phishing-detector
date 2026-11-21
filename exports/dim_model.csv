@@ -1,0 +1,4 @@
+model,model_label,description,sort_order,n_features
+rule,Rule baseline,Flag as phishing if URLSimilarityIndex < 100. No machine learning.,1,1
+full,Full model,Random Forest on all 50 features (URL + downloaded page content).,2,50
+url_only,URL-only model,Random Forest on 18 features computed from the URL text alone.,3,18

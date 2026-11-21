@@ -1,0 +1,85 @@
+table errors
+	lineageTag: b7473d42-6342-4f58-8256-57513cc08bc7
+
+	/// test URLs the approach got wrong
+	measure 'Error Count' = COUNTROWS ( errors )
+		formatString: #,0
+		lineageTag: f2aa71aa-b08b-48a0-afc6-225287137623
+
+	column model
+		dataType: string
+		isHidden
+		lineageTag: bad52152-5d41-477f-b3f3-4438696ee19b
+		summarizeBy: none
+		sourceColumn: model
+
+		annotation SummarizationSetBy = Automatic
+
+	column url
+		dataType: string
+		lineageTag: f6fcc5fe-111a-4b6c-b549-fbcdf457556c
+		summarizeBy: none
+		sourceColumn: url
+
+		annotation SummarizationSetBy = Automatic
+
+	column error_type
+		dataType: string
+		lineageTag: e724fb5d-ecd6-4276-8f44-35ad64c2c021
+		summarizeBy: none
+		sourceColumn: error_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column true_class
+		dataType: string
+		lineageTag: 01c95a39-28aa-4dd4-8ccd-1c9ce96ad352
+		summarizeBy: none
+		sourceColumn: true_class
+
+		annotation SummarizationSetBy = Automatic
+
+	column risk_score
+		dataType: double
+		lineageTag: 04136c73-9c50-451a-807a-97435b40638e
+		summarizeBy: none
+		sourceColumn: risk_score
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_https
+		dataType: int64
+		lineageTag: 47615271-c2d2-4b2c-afa5-730f5cfb5819
+		summarizeBy: none
+		sourceColumn: is_https
+
+		annotation SummarizationSetBy = Automatic
+
+	column url_length
+		dataType: int64
+		lineageTag: d4119c47-a947-4704-bf42-9a8e15678f04
+		summarizeBy: none
+		sourceColumn: url_length
+
+		annotation SummarizationSetBy = Automatic
+
+	column url_similarity_index
+		dataType: double
+		lineageTag: afd2b705-3379-4f5a-8c8c-141e5b046b9c
+		summarizeBy: none
+		sourceColumn: url_similarity_index
+
+		annotation SummarizationSetBy = Automatic
+
+	partition errors = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "errors.csv"),[Delimiter=",", Columns=8, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Blank to null" = Table.ReplaceValue(#"Promoted Headers", "", null, Replacer.ReplaceValue, {"risk_score"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Blank to null",{{"model", type text}, {"url", type text}, {"error_type", type text}, {"true_class", type text}, {"risk_score", type number}, {"is_https", Int64.Type}, {"url_length", Int64.Type}, {"url_similarity_index", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

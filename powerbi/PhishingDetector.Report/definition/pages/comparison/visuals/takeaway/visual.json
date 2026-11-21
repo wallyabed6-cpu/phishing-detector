@@ -1,0 +1,86 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "takeaway",
+  "position": {
+    "x": 440,
+    "y": 448,
+    "z": 8,
+    "height": 252,
+    "width": 816,
+    "tabOrder": 8
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "What this means",
+                    "textStyle": {
+                      "fontSize": "13pt",
+                      "color": "#242424",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "The full model misses 1 phishing URL out of 20,189, but a one-line rule with no machine learning already catches 99.25%. The dataset is easy: every legitimate URL is a bare https:// homepage, and every one has URLSimilarityIndex = 100.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#52514e"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Without that shortcut, a model that only reads the URL text still catches 99.32% of phishing, missing 138. The misses look like real brands on clean HTTPS homepages (coinbasewalletones.com, amznn.net).",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#52514e"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Bottom line: expect lower scores on real traffic, where legitimate links have paths and phishing copies the clean look. Page content and domain reputation checks still matter.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#52514e"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

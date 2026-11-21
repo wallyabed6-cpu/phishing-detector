@@ -1,139 +1,122 @@
 """
 Step 5 — Export for Power BI
-Save clean CSVs into exports/ for dashboard use.
+Write clean CSVs to exports/ for the dashboard in powerbi/.
+
+  dim_model.csv           one row per approach (rule, full model, URL-only model)
+  model_metrics.csv       accuracy, precision, recall, F1, counts per approach
+  confusion_matrix.csv    actual vs predicted counts per approach (long format)
+  feature_importance.csv  feature rankings for both models, with a feature group
+  score_distribution.csv  how many test URLs fall in each risk score band, by true class
+  errors.csv              every test URL a model got wrong, with its risk score
+
+run from the repo root:  python scripts/step5_export.py   (after step 3)
 """
 
+import os
+import pickle
 import pandas as pd
-import numpy as np
-import pickle, os
-
-MODEL_PATH = r"C:\Users\wally\phishing-detector\exports\model.pkl"
-DATA_SPLIT = r"C:\Users\wally\phishing-detector\exports\test_split.pkl"
-DATA_PATH  = r"C:\Users\wally\phishing-detector\data\PhiUSIIL_Phishing_URL_Dataset.csv"
-EXPORT_DIR = r"C:\Users\wally\phishing-detector\exports"
-
-with open(MODEL_PATH, 'rb') as f:
-    saved = pickle.load(f)
-    rf = saved['model']
-
-with open(DATA_SPLIT, 'rb') as f:
-    split = pickle.load(f)
-    X_test        = split['X_test']
-    y_test        = split['y_test']
-    X_train       = split['X_train']
-    y_train       = split['y_train']
-    feature_names = split['feature_names']
-
-y_pred  = rf.predict(X_test)
-y_proba = rf.predict_proba(X_test)[:, 1]
-
-print("=" * 65)
-print("STEP 5 — EXPORT FOR POWER BI")
-print("=" * 65)
-
-# ── (a) Feature importance ────────────────────────────────────────────────────
-feat_imp = pd.DataFrame({
-    'feature':    feature_names,
-    'importance': rf.feature_importances_
-}).sort_values('importance', ascending=False).reset_index(drop=True)
-
-feat_imp['rank']            = feat_imp.index + 1
-feat_imp['importance_pct']  = (feat_imp['importance'] * 100).round(2)
-feat_imp['category'] = feat_imp['feature'].apply(lambda f:
-    'URL Structure'  if any(k in f for k in ['URL','Domain','TLD','Char','Digit','Letter','Special','Ampersand','QMark','Equals']) else
-    'Page Content'   if any(k in f for k in ['Line','Image','CSS','JS','Ref','iFrame','Popup','Redirect','Title','Favicon','Description','Copyright','Robots','Responsive']) else
-    'Security Signal'
-)
-
-path_a = os.path.join(EXPORT_DIR, 'feature_importance.csv')
-feat_imp[['rank','feature','importance_pct','category']].to_csv(path_a, index=False)
-print(f"\n[a] feature_importance.csv  ({len(feat_imp)} rows)")
-print(feat_imp[['rank','feature','importance_pct','category']].head(15).to_string(index=False))
-
-# ── (b) Model performance metrics ────────────────────────────────────────────
 from sklearn.metrics import confusion_matrix
-cm   = confusion_matrix(y_test, y_pred)
-tn, fp, fn, tp = cm.ravel()
 
-precision = tp / (tp + fp) if (tp + fp) > 0 else 0
-recall    = tp / (tp + fn) if (tp + fn) > 0 else 0
-f1        = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
-accuracy  = (tp + tn) / len(y_test)
+DATA_PATH = os.path.join("data", "PhiUSIIL_Phishing_URL_Dataset.csv")
+EXPORT_DIR = "exports"
 
-metrics = pd.DataFrame([
-    {'metric': 'Total URLs Tested',        'value': len(y_test),   'notes': 'Test set size (20% of full dataset)'},
-    {'metric': 'Phishing URLs in Test',    'value': int(tp + fn),  'notes': 'Ground-truth phishing count'},
-    {'metric': 'Benign URLs in Test',      'value': int(tn + fp),  'notes': 'Ground-truth benign count'},
-    {'metric': 'True Positives',           'value': int(tp),       'notes': 'Phishing correctly detected'},
-    {'metric': 'True Negatives',           'value': int(tn),       'notes': 'Benign correctly cleared'},
-    {'metric': 'False Positives',          'value': int(fp),       'notes': 'Benign wrongly flagged (annoying)'},
-    {'metric': 'False Negatives',          'value': int(fn),       'notes': 'Phishing missed (dangerous)'},
-    {'metric': 'Accuracy',                 'value': round(accuracy,   6), 'notes': 'Overall correct predictions'},
-    {'metric': 'Precision',                'value': round(precision,  6), 'notes': 'Of flagged phishing, how many were real'},
-    {'metric': 'Recall',                   'value': round(recall,     6), 'notes': 'Of all phishing, how many we caught'},
-    {'metric': 'F1 Score',                 'value': round(f1,         6), 'notes': 'Harmonic mean of precision and recall'},
-    {'metric': 'False Negative Rate',      'value': round(fn/(fn+tp) if (fn+tp)>0 else 0, 6), 'notes': 'Miss rate — key security metric'},
-    {'metric': 'False Positive Rate',      'value': round(fp/(fp+tn) if (fp+tn)>0 else 0, 6), 'notes': 'False alarm rate'},
-])
+df = pd.read_csv(DATA_PATH)
+df["is_phishing"] = 1 - df["label"]   # PhiUSIIL: label 1 = legitimate
 
-path_b = os.path.join(EXPORT_DIR, 'model_metrics.csv')
-metrics.to_csv(path_b, index=False)
-print(f"\n[b] model_metrics.csv  ({len(metrics)} rows)")
-print(metrics.to_string(index=False))
+with open(os.path.join(EXPORT_DIR, "models.pkl"), "rb") as f:
+    saved = pickle.load(f)
+test = df.loc[saved["test_idx"]].copy()
+y = test["is_phishing"]
 
-# ── (c) Sample predictions with risk scores ───────────────────────────────────
-df_full = pd.read_csv(DATA_PATH)
-DROP_COLS = ['FILENAME', 'Domain', 'Title', 'TLD']
-df_full = df_full.drop(columns=[c for c in DROP_COLS if c in df_full.columns])
 
-test_idx = X_test.index
-sample_df = df_full.loc[test_idx].copy()
-sample_df['true_label']       = y_test.values
-sample_df['predicted_label']  = y_pred
-sample_df['risk_score']       = y_proba.round(4)
-sample_df['true_class']       = sample_df['true_label'].map({0: 'Benign', 1: 'Phishing'})
-sample_df['predicted_class']  = sample_df['predicted_label'].map({0: 'Benign', 1: 'Phishing'})
-sample_df['correct']          = (sample_df['true_label'] == sample_df['predicted_label'])
-sample_df['result_type']      = sample_df.apply(lambda r:
-    'True Positive'  if r['true_label']==1 and r['predicted_label']==1 else
-    'True Negative'  if r['true_label']==0 and r['predicted_label']==0 else
-    'False Positive' if r['true_label']==0 and r['predicted_label']==1 else
-    'False Negative', axis=1)
+def save(frame, name):
+    frame.to_csv(os.path.join(EXPORT_DIR, name), index=False)
+    print(f"  {name:<24} {len(frame):>6} rows")
 
-# Sample: 500 phishing + 500 benign + all errors for completeness
-phishing_sample = sample_df[sample_df['true_label'] == 1].sample(500, random_state=42)
-benign_sample   = sample_df[sample_df['true_label'] == 0].sample(500, random_state=42)
-errors          = sample_df[sample_df['correct'] == False]
-combined        = pd.concat([phishing_sample, benign_sample, errors]).drop_duplicates()
 
-export_cols = ['URL', 'true_class', 'predicted_class', 'result_type',
-               'risk_score', 'URLSimilarityIndex', 'IsHTTPS',
-               'HasSocialNet', 'HasPasswordField', 'URLLength',
-               'NoOfExternalRef', 'LineOfCode', 'HasSubmitButton',
-               'HasHiddenFields', 'HasExternalFormSubmit']
-export_cols = [c for c in export_cols if c in combined.columns]
+# approaches, in the order they appear on the dashboard
+models = pd.DataFrame([
+    ["rule", "Rule baseline", "Flag as phishing if URLSimilarityIndex < 100. No machine learning.", 1, 1],
+    ["full", "Full model", "Random Forest on all 50 features (URL + downloaded page content).", 2, 50],
+    ["url_only", "URL-only model", "Random Forest on 18 features computed from the URL text alone.", 3, 18],
+], columns=["model", "model_label", "description", "sort_order", "n_features"])
 
-path_c = os.path.join(EXPORT_DIR, 'sample_predictions.csv')
-combined[export_cols].to_csv(path_c, index=False)
-print(f"\n[c] sample_predictions.csv  ({len(combined)} rows)")
-print(f"    Breakdown:")
-print(combined['result_type'].value_counts().to_string())
+# predictions and risk scores (probability of phishing) for each approach
+preds = {}
+scores = {}
+preds["rule"] = (test["URLSimilarityIndex"] < 100).astype(int)
+for key in ["full", "url_only"]:
+    m = saved[key]["model"]
+    X = test[saved[key]["features"]]
+    preds[key] = pd.Series(m.predict(X), index=test.index)
+    scores[key] = pd.Series(m.predict_proba(X)[:, 1], index=test.index)
 
-# ── Summary ───────────────────────────────────────────────────────────────────
-print(f"""
-[All exports saved to: {EXPORT_DIR}]
-  feature_importance.csv   -> Power BI bar chart: top features by importance
-  model_metrics.csv        -> Power BI KPI cards: accuracy, recall, FP/FN counts
-  sample_predictions.csv   -> Power BI table/scatter: URLs with risk scores
+print("STEP 5 — EXPORT FOR POWER BI")
 
-[Power BI tips]
-  - Use model_metrics.csv for KPI cards (recall, false negatives, F1)
-  - Use feature_importance.csv for a sorted bar chart, colored by category
-  - Use sample_predictions.csv for a scatter plot (risk_score vs URLLength)
-    colored by result_type to visualize where errors cluster
-  - Add a slicer on true_class or result_type to filter the URL table
-""")
+# metrics, one row per approach
+metric_rows = []
+cm_rows = []
+for key in models["model"]:
+    tn, fp, fn, tp = confusion_matrix(y, preds[key]).ravel()
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    metric_rows.append([key, len(y), (tp + tn) / len(y), precision, recall,
+                        2 * precision * recall / (precision + recall), tp, fp, fn, tn])
+    cm_rows.append([key, "Legitimate", "Legitimate", tn])
+    cm_rows.append([key, "Legitimate", "Phishing", fp])
+    cm_rows.append([key, "Phishing", "Legitimate", fn])
+    cm_rows.append([key, "Phishing", "Phishing", tp])
+metrics = pd.DataFrame(metric_rows, columns=["model", "test_urls", "accuracy", "precision", "recall", "f1",
+                                             "true_positives", "false_positives", "false_negatives", "true_negatives"])
+confusion = pd.DataFrame(cm_rows, columns=["model", "actual", "predicted", "urls"])
 
-print("=" * 65)
-print("End of Step 5.  Say 'Step 6' for the README.")
-print("=" * 65)
+# feature importance with a plain-language group
+lookup_scores = ["URLSimilarityIndex", "CharContinuationRate", "TLDLegitimateProb", "URLCharProb"]
+url_text = saved["url_only"]["features"]
+imp_rows = []
+for key in ["full", "url_only"]:
+    m = saved[key]["model"]
+    imp = pd.Series(m.feature_importances_, index=saved[key]["features"]).sort_values(ascending=False)
+    rank = 1
+    for feat, val in imp.items():
+        group = "Page content"
+        if feat in url_text:
+            group = "URL text"
+        if feat in lookup_scores:
+            group = "Lookup score"
+        imp_rows.append([key, rank, feat, round(val * 100, 2), group])
+        rank += 1
+importance = pd.DataFrame(imp_rows, columns=["model", "rank", "feature", "importance_pct", "feature_group"])
+
+# risk score bands: 0.0-0.1, 0.1-0.2, ... 0.9-1.0
+dist_rows = []
+for key in ["full", "url_only"]:
+    band = (scores[key] * 10).clip(upper=9.999).astype(int)
+    for cls_value, cls_name in [(1, "Phishing"), (0, "Legitimate")]:
+        counts = band[y == cls_value].value_counts()
+        for b in range(10):
+            label = f"{b / 10:.1f}–{(b + 1) / 10:.1f}"
+            dist_rows.append([key, cls_name, b, label, int(counts.get(b, 0))])
+distribution = pd.DataFrame(dist_rows, columns=["model", "true_class", "band_order", "risk_band", "urls"])
+
+# every mistake, so the dashboard can show what each approach got wrong
+err_rows = []
+for key in models["model"]:
+    wrong = test[preds[key] != y]
+    for idx, row in wrong.iterrows():
+        kind = "Missed phishing" if row["is_phishing"] == 1 else "False alarm"
+        score = scores[key][idx] if key in scores else None
+        err_rows.append([key, row["URL"], kind, "Phishing" if row["is_phishing"] == 1 else "Legitimate",
+                         score, row["IsHTTPS"], row["URLLength"], row["URLSimilarityIndex"]])
+errors = pd.DataFrame(err_rows, columns=["model", "url", "error_type", "true_class", "risk_score",
+                                         "is_https", "url_length", "url_similarity_index"])
+
+save(models, "dim_model.csv")
+save(metrics, "model_metrics.csv")
+save(confusion, "confusion_matrix.csv")
+save(importance, "feature_importance.csv")
+save(distribution, "score_distribution.csv")
+save(errors, "errors.csv")
+
+print()
+print(metrics[["model", "accuracy", "precision", "recall", "false_negatives", "false_positives"]].round(5).to_string(index=False))

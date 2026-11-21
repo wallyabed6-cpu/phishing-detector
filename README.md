@@ -1,109 +1,84 @@
 # Phishing URL Detector
 
-A machine learning pipeline that detects phishing URLs with near-perfect accuracy using the PhiUSIIL dataset. Built as a portfolio project combining data analytics, cybersecurity, and machine learning.
+A machine learning pipeline that classifies phishing URLs using the PhiUSIIL dataset (235,795 URLs), with an honest look at **why the scores are so high** and what's left once you remove the dataset's shortcuts. It combines data analytics, cybersecurity and machine learning, and ends in a Power BI dashboard.
 
 **[View Power BI Dashboard](https://app.powerbi.com/view?r=eyJrIjoiMzkzYmFmZmMtYTRhYy00YTUxLTg2MjQtZjQzOWU1OGQ3ODk0IiwidCI6IjYwOTU2ODg0LTEwYWQtNDBmYS04NjNkLTRmMzJjMWUzYTM3YSIsImMiOjF9)**
 
 ---
 
-## The Problem
+## Key results
 
-Phishing attacks are the most common entry point for data breaches. Attackers clone legitimate websites, register convincing domains, and trick users into submitting credentials. A reliable URL classifier can serve as an automated first line of defense — flagging malicious links before a user ever clicks them.
+Three approaches, scored on the same 47,159-URL test set (20,189 phishing, 26,970 legitimate):
+
+| Approach | Features | Recall (phishing caught) | Missed phishing | False alarms |
+|---|---|---|---|---|
+| **One-line rule:** flag if `URLSimilarityIndex < 100` | 1 | 99.25% | 152 | 0 |
+| **Random Forest, all features** | 50 | 99.995% | 1 | 0 |
+| **Random Forest, URL text only** | 18 | 99.32% | 138 | 28 |
+
+- **The full model is near-perfect, but so is a rule with no machine learning.** In this dataset, every legitimate URL is a bare `https://` homepage and every one scores exactly 100 on `URLSimilarityIndex`. The classes are almost separable by construction.
+- **A URL-only model is the more realistic test.** It reads only the URL string: no page download, no lookup scores. It still catches 99.3% of phishing.
+- **What gets missed is telling:** `coinbasewalletones.com`, `amznn.net`, `shopeinnovationt.com`. These are brand look-alikes on clean HTTPS homepages, exactly the pattern attackers can copy.
 
 ---
 
 ## Dataset
 
-**PhiUSIIL Phishing URL Dataset**
-- 235,795 labeled URLs (57% phishing, 43% benign)
-- 56 engineered features across two categories:
-  - **URL-level features** — analyzable without visiting the page (length, HTTPS, digit ratio, special characters, domain similarity)
-  - **Page-level features** — extracted after loading the page (JavaScript count, external references, password fields, social login buttons, iFrames)
-- No missing values
-- Source: peer-reviewed academic dataset, widely cited in cybersecurity research
+**[PhiUSIIL Phishing URL Dataset](https://archive.ics.uci.edu/dataset/967/phiusiil+phishing+url+dataset)** (UCI; Prasad & Chandra, *Computers & Security*, 2023)
+- 235,795 URLs: **134,850 legitimate (57.2%)** and **100,945 phishing (42.8%)**
+- 50 numeric features from the URL and the downloaded page; no missing values
+- **Label convention: `label = 1` means legitimate and `0` means phishing.** The scripts create `is_phishing = 1 - label` and check the class counts against UCI's published numbers.
+
+The dataset isn't in the repo (57 MB). Download it from UCI and save it as `data/PhiUSIIL_Phishing_URL_Dataset.csv`.
 
 ---
 
-## Project Structure
+## What separates phishing from legitimate URLs (Step 2)
 
-```
-phishing-detector/
-├── data/                          # Raw dataset
-├── scripts/
-│   ├── step1_explore.py           # Data exploration and class balance
-│   ├── step2_features.py          # Feature analysis and security interpretation
-│   ├── step3_model.py             # Model training (Random Forest + Logistic Regression)
-│   ├── step4_evaluate.py          # Security-focused evaluation and false negative analysis
-│   └── step5_export.py            # Power BI exports
-├── exports/
-│   ├── feature_importance.csv     # Feature rankings for dashboard
-│   ├── model_metrics.csv          # Performance KPIs for dashboard
-│   └── sample_predictions.csv     # Scored URLs with risk scores for dashboard
-└── README.md
-```
+| Signal | Phishing | Legitimate |
+|---|---|---|
+| Uses HTTPS | 49% | 100% |
+| Links to social networks | 0.5% | 79.5% |
+| Has copyright info | 5.7% | 80.8% |
+| Has a page description | 4.4% | 73.7% |
+| Median lines of page code | 12 | 1,105 |
+| Median external links | 0 | 46 |
+| `URLSimilarityIndex` = 100 | 0.8% | 100% |
+
+**Security takeaway:** half of phishing URLs here use HTTPS, so the padlock doesn't mean safe. What gives phishing away is that it's *thin*: throwaway pages with little code, no footer, no social links and no real content. Legitimate sites look built-out.
 
 ---
 
 ## Approach
 
-### Step 1 — Explore
-Loaded and profiled the dataset. Checked class balance, feature distributions, missing values, and data types. Confirmed the dataset was clean and well-balanced — no resampling needed.
+| Step | Script | What it does |
+|---|---|---|
+| 1 | `step1_explore.py` | Load, check missing values, confirm the label meaning against UCI's counts, spot-check URLs |
+| 2 | `step2_features.py` | Correlations and per-class comparisons, with every percentage computed from the data |
+| 3 | `step3_model.py` | Train two Random Forests (100 trees, max depth 20) on one stratified 80/20 split: all 50 features, and 18 URL-text features |
+| 4 | `step4_evaluate.py` | Score the rule baseline and both models: confusion matrices, recall, precision, and the actual URLs each one missed |
+| 5 | `step5_export.py` | Export dashboard CSVs to `exports/` |
 
-### Step 2 — Feature Analysis
-Calculated correlation of every feature with the phishing label. Key findings:
+**Why recall leads:** a missed phishing URL (false negative) can mean stolen credentials. A false alarm blocks a real site, which is annoying but recoverable.
 
-| Feature | Insight |
-|---|---|
-| `URLSimilarityIndex` | Strongest signal (r=0.86) — phishing URLs perfectly clone legitimate site structure |
-| `HasSocialNet` | 80% of phishing pages fake a social login button; only 0.5% of benign pages do |
-| `IsHTTPS` | 100% of phishing uses HTTPS — the padlock icon does not mean safe |
-| `HasPasswordField` | Phishing pages are built for credential theft; benign pages rarely have login forms |
-| `HasExternalFormSubmit` | Phishing forms send data to a third-party server |
-| `URLLength` | Shorter URLs are more suspicious — modern attackers use clean, minimal URLs |
+**Why a rule baseline:** a near-perfect score means little until you know what a trivial approach gets. Here, one `if` statement gets 99.25% recall. That's the context every other number needs.
 
-### Step 3 — Model
-Trained two classifiers on an 80/20 stratified train/test split:
-
-- **Logistic Regression** (baseline): 99.99% accuracy
-- **Random Forest** (main model): 100.00% accuracy, 100 trees, max depth 20
-
-Random Forest was chosen for its ability to handle mixed feature types, resistance to overfitting, and built-in feature importance scores.
-
-### Step 4 — Security Evaluation
-Evaluated using security-relevant metrics, not just accuracy:
-
-| Metric | Score |
-|---|---|
-| Accuracy | 99.998% |
-| Precision | 99.996% |
-| **Recall** | **100.000%** |
-| F1 Score | 99.998% |
-| **False Negatives** | **0** — zero phishing URLs missed |
-| False Positives | 1 — one benign URL wrongly flagged |
-
-**Why recall matters more than accuracy:** A false negative means a phishing URL reaches the user — potential credential theft, account takeover, or ransomware. A false positive means a legitimate site gets blocked — an inconvenience, not a breach. For a security tool, minimizing false negatives is the primary objective.
-
-Stress-tested the model by analyzing the 20 lowest-confidence correct phishing predictions. These were minimal HTTPS pages with clean URLs and no social login lures — consistent with malware delivery rather than credential harvesting, and the hardest attack type to detect with page-structure features alone.
-
-### Step 5 — Power BI Export
-Exported three dashboard-ready CSVs:
-- **feature_importance.csv** — ranked features with category labels for bar charts
-- **model_metrics.csv** — KPIs with plain-English descriptions for card visuals
-- **sample_predictions.csv** — 1,001 scored URLs with true label, predicted label, risk score, and key features for scatter plots and filterable tables
+**URL-only features** (18): length counts, letter/digit/special-character counts and ratios, subdomains, obfuscation, IP-as-domain and HTTPS. It deliberately leaves out `URLSimilarityIndex`, `URLCharProb`, `TLDLegitimateProb` and `CharContinuationRate`, which are scores computed against reference lists, plus all page-content features.
 
 ---
 
-## Results
+## Limitations
 
-The Random Forest classifier achieved **perfect recall** on the 47,159-URL test set — every phishing URL was detected, with only one false positive across 20,189 benign URLs.
-
-The most predictive features were page-level signals (`URLSimilarityIndex`, `NoOfExternalRef`, `LineOfCode`, `NoOfSelfRef`) rather than URL-only features. This has a practical implication: URL-only checks work as a fast first filter, but full page inspection is required for high-confidence classification.
+- **The dataset is easier than real traffic.** All legitimate URLs are homepages. Real users click deep links (`/login`, `/account?id=...`), so URL-based models will raise more false alarms in practice.
+- **Random split, no time dimension.** Phishing campaigns change quickly. A time-based split, training on older URLs and testing on newer ones, would be a tougher and fairer test.
+- **Page-content features need the page.** The full model must download a page before it can score it. That's slower, and attackers can serve different content to scanners.
+- **Precision depends on the mix.** The test set is 43% phishing. In real email or web traffic, phishing is a tiny fraction, so even a 0.1% false alarm rate means many blocked legitimate links.
 
 ---
 
-## Key Security Takeaway
+## Correction note
 
-Modern phishing sites are sophisticated. They use HTTPS, short clean URLs, responsive design, and copied branding — none of the obvious tells from a decade ago. What gives them away is behavioral: they request credentials, submit forms to external servers, embed social login buttons, and their page structure differs measurably from real sites. Feature engineering that captures these behavioral signals dramatically outperforms URL-only heuristics.
+An earlier version of this project mapped `label = 1` to *phishing*. PhiUSIIL uses `1` for **legitimate**, so the class names, the per-class findings (HTTPS, social links, URL length) and the false-negative/false-positive counts were reversed. Every script now builds `is_phishing = 1 - label` and checks the counts against UCI's published numbers, and all results above come from the corrected pipeline.
 
 ---
 
@@ -111,28 +86,35 @@ Modern phishing sites are sophisticated. They use HTTPS, short clean URLs, respo
 
 ```bash
 pip install pandas scikit-learn
+# download the dataset to data/PhiUSIIL_Phishing_URL_Dataset.csv, then from the repo root:
+python scripts/step1_explore.py
+python scripts/step2_features.py
+python scripts/step3_model.py
+python scripts/step4_evaluate.py
+python scripts/step5_export.py
 ```
 
-Run steps in order:
-```bash
-py scripts/step1_explore.py
-py scripts/step2_features.py
-py scripts/step3_model.py
-py scripts/step4_evaluate.py
-py scripts/step5_export.py
-```
+**Power BI:** open `powerbi/PhishingDetector.pbip` in Power BI Desktop. If the repo isn't at `C:\Users\wally\phishing-detector`, go to **Transform data → Edit parameters** and set **DataFolder** to your `exports\` folder (with a trailing `\`), then click **Refresh**.
 
 ---
 
-## Tech Stack
+## Project structure
 
-- **Python 3.13** — pandas, scikit-learn
-- **Algorithm** — Random Forest (100 estimators, max depth 20)
-- **Dataset** — PhiUSIIL Phishing URL Dataset (235,795 URLs, 56 features)
-- **Visualization** — Power BI (exports in `exports/`)
+```
+phishing-detector/
+├── data/                  dataset goes here (gitignored)
+├── scripts/               step1 … step5
+├── exports/               dashboard CSVs (models.pkl is gitignored)
+├── powerbi/               PBIP project: semantic model (TMDL) + report (PBIR)
+└── README.md
+```
+
+## Tech stack
+
+Python (pandas, scikit-learn) · Random Forest · Power BI (PBIP, DAX) · PhiUSIIL dataset
 
 ---
 
 ## About
 
-Built by a Business IT student at Virginia Tech as a portfolio project combining data analytics and cybersecurity. The goal was to build a production-realistic phishing detector — one evaluated on security metrics (recall, false negatives) rather than just accuracy, with results exportable to a business intelligence dashboard.
+Built by a Business IT student at Virginia Tech as a portfolio project combining data analytics and cybersecurity. The focus is evaluating a detector the way a security team would: by what it misses, against an honest baseline.

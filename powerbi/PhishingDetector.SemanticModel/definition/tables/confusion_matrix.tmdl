@@ -1,0 +1,52 @@
+table confusion_matrix
+	lineageTag: 5b4e4b1b-7f25-43b1-8982-30a037ba3cef
+
+	/// URL count for an actual / predicted pair
+	measure 'Confusion URLs' = SUM ( confusion_matrix[urls] )
+		formatString: #,0
+		lineageTag: 3c73b5a6-b575-48a9-b782-e7927bccffae
+
+	column model
+		dataType: string
+		isHidden
+		lineageTag: 5a709058-4cf2-4495-82af-a984eab697f8
+		summarizeBy: none
+		sourceColumn: model
+
+		annotation SummarizationSetBy = Automatic
+
+	column actual
+		dataType: string
+		lineageTag: 18e438c8-5b3f-47b1-bacc-dca73c3832d7
+		summarizeBy: none
+		sourceColumn: actual
+
+		annotation SummarizationSetBy = Automatic
+
+	column predicted
+		dataType: string
+		lineageTag: fcf7f14e-699f-49a5-be2b-d158c5b873aa
+		summarizeBy: none
+		sourceColumn: predicted
+
+		annotation SummarizationSetBy = Automatic
+
+	column urls
+		dataType: int64
+		lineageTag: e96c95c2-3746-4f4b-8e8c-660d915c3bd4
+		summarizeBy: sum
+		sourceColumn: urls
+
+		annotation SummarizationSetBy = Automatic
+
+	partition confusion_matrix = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "confusion_matrix.csv"),[Delimiter=",", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"model", type text}, {"actual", type text}, {"predicted", type text}, {"urls", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

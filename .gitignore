@@ -2,3 +2,7 @@ data/
 exports/*.pkl
 __pycache__/
 *.pyc
+
+# power bi local cache
+powerbi/**/.pbi/localSettings.json
+powerbi/**/.pbi/cache.abf
