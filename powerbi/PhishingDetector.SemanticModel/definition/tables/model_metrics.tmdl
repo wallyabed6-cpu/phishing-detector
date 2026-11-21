@@ -1,50 +1,50 @@
 table model_metrics
-	lineageTag: 78427cc7-cc4f-480b-89a9-fa9b3800bfe1
+	lineageTag: d3ca4227-e8a6-48e6-9ab2-26435ab1f747
 
 	/// share of test URLs classified correctly
-	measure 'Accuracy' = AVERAGE ( model_metrics[accuracy] )
+	measure 'Accuracy' = AVERAGE ( model_metrics[accuracy_raw] )
 		formatString: 0.000%
-		lineageTag: f0b88b86-c1f3-4911-8721-aedfff0bd48b
+		lineageTag: d0dadbf5-874c-4fbc-9939-e5c47ddec45f
 
 	/// of all phishing URLs, the share that was caught
-	measure 'Recall' = AVERAGE ( model_metrics[recall] )
+	measure 'Recall' = AVERAGE ( model_metrics[recall_raw] )
 		formatString: 0.00%
-		lineageTag: 4e6f216e-3ebe-4280-95e1-c3a49dd7d365
+		lineageTag: bbd2c045-6c88-4c57-afb0-068f3416f0a3
 
 	/// of URLs flagged as phishing, the share that really were
-	measure 'Precision' = AVERAGE ( model_metrics[precision] )
+	measure 'Precision' = AVERAGE ( model_metrics[precision_raw] )
 		formatString: 0.00%
-		lineageTag: b34b780d-6bd0-4a9a-ad4e-ac207310dfe9
+		lineageTag: ce397018-ae44-448b-a147-9f1109d1d23b
 
 	/// balance of precision and recall
 	measure 'F1 Score' = AVERAGE ( model_metrics[f1] )
 		formatString: 0.0000
-		lineageTag: 11d5af45-e4aa-4fe4-b4fa-264b5280f3c2
+		lineageTag: b52061be-d8ed-4083-a803-2f051e1328b9
 
 	/// phishing URLs that got through (false negatives)
 	measure 'Missed Phishing' = SUM ( model_metrics[false_negatives] )
 		formatString: #,0
-		lineageTag: 8f4ae6b2-83c8-46b3-b396-6f985957b797
+		lineageTag: 3232d4b8-c995-4004-b07d-196a4717ebb6
 
 	/// legitimate URLs wrongly flagged (false positives)
 	measure 'False Alarms' = SUM ( model_metrics[false_positives] )
 		formatString: #,0
-		lineageTag: 401a51f4-3fe4-46ae-887d-2e63f9442867
+		lineageTag: 8f509605-b6ce-4e8d-8389-cec76fdc7510
 
 	/// size of the held-out test set
 	measure 'Test URLs' = MAX ( model_metrics[test_urls] )
 		formatString: #,0
-		lineageTag: a9bdf88b-dc06-4c69-9035-5c071ffd8fb0
+		lineageTag: 7d3a4411-6548-43ee-9bef-325cc0eae4c1
 
 	/// phishing URLs in the test set
 	measure 'Phishing in Test' = MAXX ( model_metrics, model_metrics[true_positives] + model_metrics[false_negatives] )
 		formatString: #,0
-		lineageTag: 91ae0225-f84c-414a-ac8c-e16f0a1805e2
+		lineageTag: e0e5f6a5-2b08-4327-9107-9a1b6fac14e2
 
 	column model
 		dataType: string
 		isHidden
-		lineageTag: 9cf06fdd-7c05-42a3-9c74-b90c67921d06
+		lineageTag: ac7f3d9f-ff59-4611-ab7e-c9c9d935ffbc
 		summarizeBy: none
 		sourceColumn: model
 
@@ -52,34 +52,37 @@ table model_metrics
 
 	column test_urls
 		dataType: int64
-		lineageTag: 1b8d6bbb-bb1c-4446-8f22-84d2eeeba6bc
+		lineageTag: 52e7e152-bd5c-444c-9832-4a713bda2008
 		summarizeBy: none
 		sourceColumn: test_urls
 
 		annotation SummarizationSetBy = Automatic
 
-	column accuracy
+	column accuracy_raw
 		dataType: double
+		isHidden
 		formatString: 0.00%
-		lineageTag: 4ada8d9e-fe45-4b87-bbf8-586a022ebd90
+		lineageTag: 613ddbf7-b715-4bcd-b965-69b3acda6d14
 		summarizeBy: none
 		sourceColumn: accuracy
 
 		annotation SummarizationSetBy = Automatic
 
-	column precision
+	column precision_raw
 		dataType: double
+		isHidden
 		formatString: 0.00%
-		lineageTag: 1d5712d4-bcb2-4262-be08-c7dbae70e1ed
+		lineageTag: f69e0525-5624-4097-8cc0-9212361a86b4
 		summarizeBy: none
 		sourceColumn: precision
 
 		annotation SummarizationSetBy = Automatic
 
-	column recall
+	column recall_raw
 		dataType: double
+		isHidden
 		formatString: 0.00%
-		lineageTag: 51dd49cd-f462-44c2-bb7c-4632c2e28eed
+		lineageTag: d867318e-2c8e-452c-af2c-c0bdcd76834b
 		summarizeBy: none
 		sourceColumn: recall
 
@@ -87,7 +90,7 @@ table model_metrics
 
 	column f1
 		dataType: double
-		lineageTag: bbc31787-14a3-4dc0-9f05-366dddf7cddc
+		lineageTag: 88895935-9eb1-48cc-a743-3fbda61673b7
 		summarizeBy: none
 		sourceColumn: f1
 
@@ -95,7 +98,7 @@ table model_metrics
 
 	column true_positives
 		dataType: int64
-		lineageTag: 9799c11c-6b91-4e76-91e2-dba2dbfd1b57
+		lineageTag: 3f22e8d3-8cf7-47f0-91c8-a211e490c9af
 		summarizeBy: none
 		sourceColumn: true_positives
 
@@ -103,7 +106,7 @@ table model_metrics
 
 	column false_positives
 		dataType: int64
-		lineageTag: 7de82dc9-2fb0-41d6-b25a-61c12bcdc9d9
+		lineageTag: cd0b2345-ae83-4e2c-9324-0c8cefb3da74
 		summarizeBy: none
 		sourceColumn: false_positives
 
@@ -111,7 +114,7 @@ table model_metrics
 
 	column false_negatives
 		dataType: int64
-		lineageTag: 17a8b77a-4c5d-4313-9f0e-7ef42e8ba974
+		lineageTag: a4b3fdb0-5eac-48b6-b91c-92248c5457ce
 		summarizeBy: none
 		sourceColumn: false_negatives
 
@@ -119,7 +122,7 @@ table model_metrics
 
 	column true_negatives
 		dataType: int64
-		lineageTag: 599caf20-7afe-41aa-bd67-666f0c7e71b6
+		lineageTag: b143396d-e983-4ed4-8dbd-91135918dbba
 		summarizeBy: none
 		sourceColumn: true_negatives
 
