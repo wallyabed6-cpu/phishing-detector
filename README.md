@@ -86,12 +86,6 @@ The dataset isn't in the repo (57 MB). Download it from UCI and save it as `data
 
 ---
 
-## Correction note
-
-An earlier version of this project mapped `label = 1` to *phishing*. PhiUSIIL uses `1` for **legitimate**, so the class names, the per-class findings (HTTPS, social links, URL length) and the false-negative/false-positive counts were reversed. Every script now builds `is_phishing = 1 - label` and checks the counts against UCI's published numbers, and all results above come from the corrected pipeline.
-
----
-
 ## Setup
 
 ```bash
