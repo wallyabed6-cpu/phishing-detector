@@ -1,0 +1,206 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "compare",
+  "position": {
+    "x": 24,
+    "y": 212,
+    "z": 5,
+    "height": 220,
+    "width": 760,
+    "tabOrder": 5
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_model"
+                    }
+                  },
+                  "Property": "model_label"
+                }
+              },
+              "queryRef": "dim_model.model_label",
+              "nativeQueryRef": "model_label",
+              "displayName": "Approach"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_model"
+                    }
+                  },
+                  "Property": "n_features"
+                }
+              },
+              "queryRef": "dim_model.n_features",
+              "nativeQueryRef": "n_features",
+              "displayName": "Features"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "model_metrics"
+                    }
+                  },
+                  "Property": "Accuracy"
+                }
+              },
+              "queryRef": "model_metrics.Accuracy",
+              "nativeQueryRef": "Accuracy",
+              "displayName": "Accuracy"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "model_metrics"
+                    }
+                  },
+                  "Property": "Recall"
+                }
+              },
+              "queryRef": "model_metrics.Recall",
+              "nativeQueryRef": "Recall",
+              "displayName": "Recall"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "model_metrics"
+                    }
+                  },
+                  "Property": "Precision"
+                }
+              },
+              "queryRef": "model_metrics.Precision",
+              "nativeQueryRef": "Precision",
+              "displayName": "Precision"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "model_metrics"
+                    }
+                  },
+                  "Property": "Missed Phishing"
+                }
+              },
+              "queryRef": "model_metrics.Missed Phishing",
+              "nativeQueryRef": "Missed Phishing",
+              "displayName": "Missed phishing"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "model_metrics"
+                    }
+                  },
+                  "Property": "False Alarms"
+                }
+              },
+              "queryRef": "model_metrics.False Alarms",
+              "nativeQueryRef": "False Alarms",
+              "displayName": "False alarms"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "autoSizeColumnWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Three approaches, same test set'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Rule = flag as phishing if URLSimilarityIndex < 100. URL-only = no page download, no lookup scores.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

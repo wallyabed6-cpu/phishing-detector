@@ -1,0 +1,62 @@
+table score_distribution
+	lineageTag: b2d80684-dca6-4545-a7dc-fd360ce22ecf
+
+	/// test URLs whose risk score falls in the band
+	measure 'URLs in Band' = SUM ( score_distribution[urls] )
+		formatString: #,0
+		lineageTag: 3ba91de8-0974-4e2d-9717-13de99b93748
+
+	column model
+		dataType: string
+		isHidden
+		lineageTag: 7939a725-b84d-4a4b-93e5-1b8438fe8afe
+		summarizeBy: none
+		sourceColumn: model
+
+		annotation SummarizationSetBy = Automatic
+
+	column true_class
+		dataType: string
+		lineageTag: 111830ac-49de-4af1-871b-f11c6f53165c
+		summarizeBy: none
+		sourceColumn: true_class
+
+		annotation SummarizationSetBy = Automatic
+
+	column band_order
+		dataType: int64
+		isHidden
+		lineageTag: b8ce2882-2c4f-4fc1-b448-8ff2d970296b
+		summarizeBy: none
+		sourceColumn: band_order
+
+		annotation SummarizationSetBy = Automatic
+
+	column risk_band
+		dataType: string
+		lineageTag: 14262602-ac57-4244-80c9-4c1c04d70301
+		summarizeBy: none
+		sourceColumn: risk_band
+		sortByColumn: band_order
+
+		annotation SummarizationSetBy = Automatic
+
+	column urls
+		dataType: int64
+		lineageTag: e267b21c-5b66-44d9-86dd-eead53de83d6
+		summarizeBy: sum
+		sourceColumn: urls
+
+		annotation SummarizationSetBy = Automatic
+
+	partition score_distribution = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "score_distribution.csv"),[Delimiter=",", Columns=5, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"model", type text}, {"true_class", type text}, {"band_order", Int64.Type}, {"risk_band", type text}, {"urls", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

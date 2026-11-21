@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "PhishingDetector"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "03b3bca1-d38a-4885-ac70-1cb782a86c96"
+  }
+}

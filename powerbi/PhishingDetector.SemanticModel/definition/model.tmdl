@@ -1,0 +1,22 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["DataFolder","dim_model","model_metrics","confusion_matrix","feature_importance","score_distribution","errors"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_model
+ref table model_metrics
+ref table confusion_matrix
+ref table feature_importance
+ref table score_distribution
+ref table errors
+
+ref cultureInfo en-US

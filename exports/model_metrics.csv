@@ -1,14 +1,4 @@
-metric,value,notes
-Total URLs Tested,47159.0,Test set size (20% of full dataset)
-Phishing URLs in Test,26970.0,Ground-truth phishing count
-Benign URLs in Test,20189.0,Ground-truth benign count
-True Positives,26970.0,Phishing correctly detected
-True Negatives,20188.0,Benign correctly cleared
-False Positives,1.0,Benign wrongly flagged (annoying)
-False Negatives,0.0,Phishing missed (dangerous)
-Accuracy,0.999979,Overall correct predictions
-Precision,0.999963,"Of flagged phishing, how many were real"
-Recall,1.0,"Of all phishing, how many we caught"
-F1 Score,0.999981,Harmonic mean of precision and recall
-False Negative Rate,0.0,Miss rate — key security metric
-False Positive Rate,5e-05,False alarm rate
+model,test_urls,accuracy,precision,recall,f1,true_positives,false_positives,false_negatives,true_negatives
+rule,47159,0.9967768612566,1.0,0.9924711476546634,0.9962213493760255,20037,0,152,26970
+full,47159,0.999978795139846,1.0,0.9999504680766754,0.9999752334249697,20188,0,1,26970
+url_only,47159,0.9964799932144448,0.9986055082424423,0.9931645945812075,0.9958776199463594,20051,28,138,26942

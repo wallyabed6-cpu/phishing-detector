@@ -1,0 +1,13 @@
+model,actual,predicted,urls
+rule,Legitimate,Legitimate,26970
+rule,Legitimate,Phishing,0
+rule,Phishing,Legitimate,152
+rule,Phishing,Phishing,20037
+full,Legitimate,Legitimate,26970
+full,Legitimate,Phishing,0
+full,Phishing,Legitimate,1
+full,Phishing,Phishing,20188
+url_only,Legitimate,Legitimate,26942
+url_only,Legitimate,Phishing,28
+url_only,Phishing,Legitimate,138
+url_only,Phishing,Phishing,20051

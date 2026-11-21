@@ -1,67 +1,60 @@
 """
 Step 1 — Data Exploration
 Load the CSV and understand what we're working with before touching any models.
+
+run from the repo root:  python scripts/step1_explore.py
 """
 
+import os
 import pandas as pd
 
-DATA_PATH = r"C:\Users\wally\phishing-detector\data\PhiUSIIL_Phishing_URL_Dataset.csv"
+DATA_PATH = os.path.join("data", "PhiUSIIL_Phishing_URL_Dataset.csv")
 
-# ── Load ──────────────────────────────────────────────────────────────────────
 df = pd.read_csv(DATA_PATH)
+
+# in PhiUSIIL, label 1 = legitimate and 0 = phishing (UCI: 134,850 legitimate, 100,945 phishing).
+# flip it into a column that reads the way we think: 1 = phishing
+df["is_phishing"] = 1 - df["label"]
 
 print("=" * 60)
 print("STEP 1 — DATA EXPLORATION")
 print("=" * 60)
 
-# ── Shape ─────────────────────────────────────────────────────────────────────
-print(f"\n[Shape]  {df.shape[0]:,} rows  ×  {df.shape[1]} columns")
+print(f"\n[Shape]  {df.shape[0]:,} rows  x  {df.shape[1]} columns")
 
-# ── Columns ───────────────────────────────────────────────────────────────────
-print(f"\n[Columns]\n  {df.columns.tolist()}")
-
-# ── Sample rows ───────────────────────────────────────────────────────────────
-print("\n[Sample rows — first 5]")
-sample_cols = [c for c in df.columns if c not in ['FILENAME', 'URL', 'Domain', 'Title']]
-print(df[sample_cols].head(5).to_string(index=False))
-
-# ── Data types ────────────────────────────────────────────────────────────────
-print("\n[Data types]")
-for col, dtype in df.dtypes.items():
-    print(f"  {col:<25} {dtype}")
-
-# ── Missing values ────────────────────────────────────────────────────────────
-print("\n[Missing values]")
+# missing values
 missing = df.isnull().sum()
-has_missing = missing[missing > 0]
-if len(has_missing) == 0:
-    print("  None — dataset is complete.")
-else:
-    print(has_missing.to_string())
+print("\n[Missing values]", "none" if missing.sum() == 0 else missing[missing > 0].to_string())
 
-# ── Class balance ─────────────────────────────────────────────────────────────
+# class balance, with a check that the label meaning matches UCI's published counts
 print("\n[Class balance]")
-target_candidates = [c for c in df.columns if c.lower() in
-                     ['class', 'label', 'phishing', 'result', 'target', 'status']]
-target_col = target_candidates[0] if target_candidates else df.columns[-1]
-print(f"  Target column: '{target_col}'")
+counts = df["is_phishing"].value_counts()
+for val in [1, 0]:
+    name = "phishing" if val == 1 else "legitimate"
+    print(f"  {name:<11}: {counts[val]:>7,}  ({counts[val] / len(df):.1%})")
+if counts[0] != 134850 or counts[1] != 100945:
+    print("  WARNING: counts don't match UCI (134,850 legitimate / 100,945 phishing) — check the label mapping")
 
-counts = df[target_col].value_counts().sort_index()
-totals = len(df)
-for val, cnt in counts.items():
-    label = "phishing" if val == 1 else "benign"
-    print(f"  {val} ({label:<8}): {cnt:>6,}  ({cnt/totals:.1%})")
+# spot-check the mapping with URLs a human can judge
+print("\n[Spot check — random URLs from each class]")
+for val, name in [(1, "phishing"), (0, "legitimate")]:
+    sample = df[df["is_phishing"] == val]["URL"].sample(5, random_state=1)
+    print(f"  {name}:")
+    for url in sample:
+        print(f"    {url[:90]}")
 
-# ── Feature distributions ─────────────────────────────────────────────────────
-print("\n[Feature distributions — numeric summary]")
-feature_cols = [c for c in df.columns if c != target_col]
-print(df[feature_cols].describe().round(2).to_string())
+# how the two classes differ on a few features you can see in the URL
+print("\n[Quick profile by class]")
+has_path = df["URL"].str.replace(r"^https?://", "", regex=True).str.rstrip("/").str.contains("/")
+df["has_path"] = has_path.astype(int)
+profile = df.groupby("is_phishing")[["IsHTTPS", "has_path", "URLLength", "URLSimilarityIndex"]].mean().round(3)
+profile.index = ["legitimate", "phishing"]
+print(profile.to_string())
 
-# ── Per-class means (key signal) ──────────────────────────────────────────────
-print("\n[Per-class feature means — phishing (1) vs benign (0)]")
-numeric_features = df[feature_cols].select_dtypes(include='number').columns.tolist()
-print(df.groupby(target_col)[numeric_features].mean().round(3).to_string())
-
-print("\n" + "=" * 60)
-print("End of Step 1.  Review the output above, then say 'Step 2' to continue.")
+print("""
+[What this tells us]
+  Every legitimate URL in this dataset is a bare https:// homepage (no path), and every one
+  has URLSimilarityIndex = 100. Phishing URLs vary much more. That makes the two classes very
+  easy to separate, so expect near-perfect scores in Step 4 and read them with care.
+""")
 print("=" * 60)

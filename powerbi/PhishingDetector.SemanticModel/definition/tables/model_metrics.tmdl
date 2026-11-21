@@ -1,0 +1,141 @@
+table model_metrics
+	lineageTag: 7f708a66-5e37-43e7-9fec-a5ee7c90332f
+
+	/// share of test URLs classified correctly
+	measure 'Accuracy' = AVERAGE ( model_metrics[accuracy_raw] )
+		formatString: 0.000%
+		lineageTag: ecbb5744-38c3-4d17-b6a3-57b212187a86
+
+	/// of all phishing URLs, the share that was caught
+	measure 'Recall' = AVERAGE ( model_metrics[recall_raw] )
+		formatString: 0.000%
+		lineageTag: d5fc538a-66e2-4178-bbbe-dd9f9d76bdc5
+
+	/// of URLs flagged as phishing, the share that really were
+	measure 'Precision' = AVERAGE ( model_metrics[precision_raw] )
+		formatString: 0.000%
+		lineageTag: 801d2885-e196-4f50-94a7-706756674950
+
+	/// balance of precision and recall
+	measure 'F1 Score' = AVERAGE ( model_metrics[f1] )
+		formatString: 0.0000
+		lineageTag: 09f8f8b3-6f86-47dd-9a91-522604e5f0a0
+
+	/// phishing URLs that got through (false negatives)
+	measure 'Missed Phishing' = SUM ( model_metrics[false_negatives] )
+		formatString: #,0
+		lineageTag: 48c09973-f716-4024-bdea-435d4e250f16
+
+	/// legitimate URLs wrongly flagged (false positives)
+	measure 'False Alarms' = SUM ( model_metrics[false_positives] )
+		formatString: #,0
+		lineageTag: 8797249a-32be-4e43-ae48-0e76503e61f6
+
+	/// size of the held-out test set
+	measure 'Test URLs' = MAX ( model_metrics[test_urls] )
+		formatString: #,0
+		lineageTag: acdbc768-5ac8-4a85-a035-cc74b2f2fc49
+
+	/// phishing URLs in the test set
+	measure 'Phishing in Test' = MAXX ( model_metrics, model_metrics[true_positives] + model_metrics[false_negatives] )
+		formatString: #,0
+		lineageTag: 8cd82dac-31f9-4153-9a23-ac7159eda86f
+
+	column model
+		dataType: string
+		isHidden
+		lineageTag: b29d9932-8999-47fa-9659-e7b33ba37254
+		summarizeBy: none
+		sourceColumn: model
+
+		annotation SummarizationSetBy = Automatic
+
+	column test_urls
+		dataType: int64
+		lineageTag: 42341af4-ae6d-47fe-b97c-3eb3524a13cc
+		summarizeBy: none
+		sourceColumn: test_urls
+
+		annotation SummarizationSetBy = Automatic
+
+	column accuracy_raw
+		dataType: double
+		isHidden
+		formatString: 0.00%
+		lineageTag: 9c342be7-700e-4927-b45e-7939bb722401
+		summarizeBy: none
+		sourceColumn: accuracy
+
+		annotation SummarizationSetBy = Automatic
+
+	column precision_raw
+		dataType: double
+		isHidden
+		formatString: 0.00%
+		lineageTag: e6b63ab7-331a-4419-8892-2dcf1ee7408c
+		summarizeBy: none
+		sourceColumn: precision
+
+		annotation SummarizationSetBy = Automatic
+
+	column recall_raw
+		dataType: double
+		isHidden
+		formatString: 0.00%
+		lineageTag: dffd40c3-ce1c-4b03-9f0f-3bc46c3a7935
+		summarizeBy: none
+		sourceColumn: recall
+
+		annotation SummarizationSetBy = Automatic
+
+	column f1
+		dataType: double
+		lineageTag: 25ae48a6-5c45-408b-adab-ceb75cf30334
+		summarizeBy: none
+		sourceColumn: f1
+
+		annotation SummarizationSetBy = Automatic
+
+	column true_positives
+		dataType: int64
+		lineageTag: 5f6fced6-b01e-41b1-98be-70d07f485bb4
+		summarizeBy: none
+		sourceColumn: true_positives
+
+		annotation SummarizationSetBy = Automatic
+
+	column false_positives
+		dataType: int64
+		lineageTag: 8a314cff-aa6a-44da-8b3b-20d4faa757b1
+		summarizeBy: none
+		sourceColumn: false_positives
+
+		annotation SummarizationSetBy = Automatic
+
+	column false_negatives
+		dataType: int64
+		lineageTag: b35ac276-80a3-4d3f-8f25-214ca4c1ae14
+		summarizeBy: none
+		sourceColumn: false_negatives
+
+		annotation SummarizationSetBy = Automatic
+
+	column true_negatives
+		dataType: int64
+		lineageTag: 46f71f01-2f4a-43d0-a26c-04a88b248781
+		summarizeBy: none
+		sourceColumn: true_negatives
+
+		annotation SummarizationSetBy = Automatic
+
+	partition model_metrics = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "model_metrics.csv"),[Delimiter=",", Columns=10, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"model", type text}, {"test_urls", Int64.Type}, {"accuracy", type number}, {"precision", type number}, {"recall", type number}, {"f1", type number}, {"true_positives", Int64.Type}, {"false_positives", Int64.Type}, {"false_negatives", Int64.Type}, {"true_negatives", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table

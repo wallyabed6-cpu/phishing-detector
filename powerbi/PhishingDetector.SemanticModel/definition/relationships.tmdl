@@ -1,0 +1,19 @@
+relationship model_metrics_model_dim_model_model
+	fromColumn: model_metrics.model
+	toColumn: dim_model.model
+
+relationship confusion_matrix_model_dim_model_model
+	fromColumn: confusion_matrix.model
+	toColumn: dim_model.model
+
+relationship feature_importance_model_dim_model_model
+	fromColumn: feature_importance.model
+	toColumn: dim_model.model
+
+relationship score_distribution_model_dim_model_model
+	fromColumn: score_distribution.model
+	toColumn: dim_model.model
+
+relationship errors_model_dim_model_model
+	fromColumn: errors.model
+	toColumn: dim_model.model

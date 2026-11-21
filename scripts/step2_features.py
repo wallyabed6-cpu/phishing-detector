@@ -1,73 +1,70 @@
 """
 Step 2 — Feature Analysis
-Find which features best separate phishing from benign URLs.
+Find which features separate phishing from legitimate URLs. All percentages below are
+computed from the data, not typed in by hand.
+
+run from the repo root:  python scripts/step2_features.py
 """
 
+import os
 import pandas as pd
-import numpy as np
 
-DATA_PATH = r"C:\Users\wally\phishing-detector\data\PhiUSIIL_Phishing_URL_Dataset.csv"
+DATA_PATH = os.path.join("data", "PhiUSIIL_Phishing_URL_Dataset.csv")
 
 df = pd.read_csv(DATA_PATH)
+df["is_phishing"] = 1 - df["label"]   # PhiUSIIL: label 1 = legitimate
 
-# Drop non-numeric / identifier columns
-DROP_COLS = ['FILENAME', 'URL', 'Domain', 'Title', 'TLD']
-df = df.drop(columns=DROP_COLS)
+DROP_COLS = ["FILENAME", "URL", "Domain", "Title", "TLD", "label"]
+features = [c for c in df.columns if c not in DROP_COLS + ["is_phishing"]]
 
-target_col = 'label'
-feature_cols = [c for c in df.columns if c != target_col]
+phish = df[df["is_phishing"] == 1]
+legit = df[df["is_phishing"] == 0]
 
 print("=" * 65)
 print("STEP 2 — FEATURE ANALYSIS")
 print("=" * 65)
 
-# ── 1. Correlation with label ─────────────────────────────────────────────────
-print("\n[1] Correlation with label (strongest separators first)")
-print("    Positive = more common in phishing | Negative = more common in benign\n")
+# correlation with is_phishing: positive = more common in phishing
+print("\n[1] Correlation with is_phishing (strongest first)")
+print("    positive = higher in phishing | negative = higher in legitimate\n")
+corr = df[features].corrwith(df["is_phishing"]).sort_values(key=abs, ascending=False)
+for feat, val in corr.head(15).items():
+    side = "phishing  " if val > 0 else "legitimate"
+    print(f"  {feat:<30} {val:+.3f}  higher in {side}")
 
-corr = df[feature_cols].corrwith(df[target_col]).sort_values(key=abs, ascending=False)
-for feat, val in corr.items():
-    direction = "-> phishing" if val > 0 else "-> benign "
-    bar = "#" * int(abs(val) * 40)
-    print(f"  {feat:<30} {val:+.3f}  {direction}  {bar}")
+# yes/no features: how often each appears in each class
+print("\n[2] Yes/no features — % present in each class")
+print(f"  {'Feature':<26} {'Phishing':>9} {'Legitimate':>11}")
+binary = [c for c in features if df[c].nunique() == 2]
+rows = []
+for col in binary:
+    p = phish[col].mean() * 100
+    l = legit[col].mean() * 100
+    rows.append([col, p, l])
+rows = sorted(rows, key=lambda r: abs(r[1] - r[2]), reverse=True)
+for col, p, l in rows:
+    print(f"  {col:<26} {p:>8.1f}% {l:>10.1f}%")
 
-# ── 2. Top 10 features — group means ─────────────────────────────────────────
-print("\n[2] Top 10 features — mean value by class")
-print(f"  {'Feature':<30} {'Benign (0)':>12} {'Phishing (1)':>14} {'Difference':>12}\n")
+# a few numeric features worth talking about
+print("\n[3] Medians by class")
+for col in ["URLLength", "URLSimilarityIndex", "LineOfCode", "NoOfExternalRef", "NoOfImage"]:
+    print(f"  {col:<22} phishing {phish[col].median():>9.1f}   legitimate {legit[col].median():>9.1f}")
 
-top10 = corr.head(10).index.tolist()
-for feat in top10:
-    b = df[df[target_col] == 0][feat].mean()
-    p = df[df[target_col] == 1][feat].mean()
-    diff = p - b
-    print(f"  {feat:<30} {b:>12.3f} {p:>14.3f} {diff:>+12.3f}")
-
-# ── 3. Binary feature breakdown ───────────────────────────────────────────────
-print("\n[3] Binary features — % present in each class")
-binary_cols = [c for c in feature_cols if df[c].nunique() == 2]
-print(f"  {'Feature':<30} {'% Benign':>10} {'% Phishing':>12}\n")
-for col in sorted(binary_cols):
-    b_pct = df[df[target_col] == 0][col].mean() * 100
-    p_pct = df[df[target_col] == 1][col].mean() * 100
-    flag = " <-- BIG gap" if abs(p_pct - b_pct) > 40 else ""
-    print(f"  {col:<30} {b_pct:>9.1f}%  {p_pct:>10.1f}%{flag}")
-
-# ── 4. Plain-language summary ─────────────────────────────────────────────────
-print("\n[4] Plain-language security interpretation")
-insights = [
-    ("URLSimilarityIndex",    "Phishing URLs score 100% similarity to known-good sites — attackers clone real URLs to fool users at a glance."),
-    ("IsHTTPS",               "100% of phishing here uses HTTPS. The padlock means encrypted, NOT safe — a key misconception to address."),
-    ("HasPasswordField",      "59% of phishing pages have a password field vs 9% benign. The whole point is credential theft."),
-    ("HasSocialNet",          "80% of phishing pages fake a social-media login button — 'Sign in with Google/Facebook' as a lure."),
-    ("HasExternalFormSubmit", "Phishing forms submit to an external server. Your creds go somewhere you never intended."),
-    ("NoOfiFrame",            "Phishing pages use ~3x more iFrames — hidden frames that load malicious content invisibly."),
-    ("DomainTitleMatchScore", "Benign sites: title matches domain. Phishing sites: title says 'PayPal Login' but domain is random."),
-    ("URLLength",             "Benign URLs are longer here — phishing uses short, clean-looking URLs to avoid suspicion."),
-]
-for feat, desc in insights:
-    print(f"\n  {feat}")
-    print(f"    {desc}")
-
-print("\n" + "=" * 65)
-print("End of Step 2.  Say 'Step 3' to build the model.")
+# plain-language takeaways, built from the numbers above
+https_p = phish["IsHTTPS"].mean() * 100
+https_l = legit["IsHTTPS"].mean() * 100
+social_p = phish["HasSocialNet"].mean() * 100
+social_l = legit["HasSocialNet"].mean() * 100
+sim_l = (legit["URLSimilarityIndex"] == 100).mean() * 100
+sim_p = (phish["URLSimilarityIndex"] == 100).mean() * 100
+print(f"""
+[4] Plain-language interpretation
+  - HTTPS: {https_p:.0f}% of phishing URLs use HTTPS vs {https_l:.0f}% of legitimate ones.
+    The padlock is common on phishing, but here every legitimate URL has it, so its absence is a strong red flag.
+  - Social links: {social_l:.0f}% of legitimate pages link to social networks vs {social_p:.1f}% of phishing pages.
+    Real sites have a full footer (social links, copyright, description); throwaway phishing pages don't.
+  - Page size: legitimate pages are far bigger (more code, images, links). Phishing kits are thin.
+  - URLSimilarityIndex: {sim_l:.0f}% of legitimate URLs score exactly 100 vs {sim_p:.1f}% of phishing.
+    This one feature nearly gives the answer away (see Step 4 baseline).
+""")
 print("=" * 65)

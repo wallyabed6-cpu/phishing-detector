@@ -1,0 +1,56 @@
+table dim_model
+	lineageTag: 34c7b3d7-0d10-43f5-8e86-b21f1585d2fb
+
+	column model
+		dataType: string
+		lineageTag: 9812f89b-58f5-4085-b74e-b484e364906c
+		summarizeBy: none
+		sourceColumn: model
+
+		annotation SummarizationSetBy = Automatic
+
+	column model_label
+		dataType: string
+		lineageTag: 8dd534e0-1fae-41aa-983f-31c424f974c6
+		summarizeBy: none
+		sourceColumn: model_label
+		sortByColumn: sort_order
+
+		annotation SummarizationSetBy = Automatic
+
+	column description
+		dataType: string
+		lineageTag: 11488a5b-eb73-4c97-b1c7-92d8bddbf1a6
+		summarizeBy: none
+		sourceColumn: description
+
+		annotation SummarizationSetBy = Automatic
+
+	column sort_order
+		dataType: int64
+		isHidden
+		lineageTag: e21dac9e-a21d-4a68-8c0d-fd650118554b
+		summarizeBy: none
+		sourceColumn: sort_order
+
+		annotation SummarizationSetBy = Automatic
+
+	column n_features
+		dataType: int64
+		lineageTag: 8683e885-ac20-494c-85a4-3ea46b8b92b2
+		summarizeBy: none
+		sourceColumn: n_features
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_model = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFolder & "dim_model.csv"),[Delimiter=",", Columns=5, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"model", type text}, {"model_label", type text}, {"description", type text}, {"sort_order", Int64.Type}, {"n_features", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
