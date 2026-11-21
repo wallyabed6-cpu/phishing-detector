@@ -13,7 +13,7 @@ DATA_PATH = os.path.join("data", "PhiUSIIL_Phishing_URL_Dataset.csv")
 df = pd.read_csv(DATA_PATH)
 
 # in PhiUSIIL, label 1 = legitimate and 0 = phishing (UCI: 134,850 legitimate, 100,945 phishing).
-# flip it into a column that reads the way we think: 1 = phishing
+# turn it into a column that reads the way we think: 1 = phishing
 df["is_phishing"] = 1 - df["label"]
 
 print("=" * 60)
