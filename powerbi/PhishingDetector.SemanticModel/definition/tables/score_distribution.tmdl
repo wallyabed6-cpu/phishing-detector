@@ -1,15 +1,15 @@
 table score_distribution
-	lineageTag: db5b10fb-c4aa-4e0f-b846-efc92e2fccff
+	lineageTag: b2d80684-dca6-4545-a7dc-fd360ce22ecf
 
 	/// test URLs whose risk score falls in the band
 	measure 'URLs in Band' = SUM ( score_distribution[urls] )
 		formatString: #,0
-		lineageTag: 33a5d570-e338-4acd-8964-a5d7447a8098
+		lineageTag: 3ba91de8-0974-4e2d-9717-13de99b93748
 
 	column model
 		dataType: string
 		isHidden
-		lineageTag: fc85994e-fda4-4044-be25-6347bde28e2d
+		lineageTag: 7939a725-b84d-4a4b-93e5-1b8438fe8afe
 		summarizeBy: none
 		sourceColumn: model
 
@@ -17,7 +17,7 @@ table score_distribution
 
 	column true_class
 		dataType: string
-		lineageTag: 2f215c1a-785b-4440-9e2a-48ba8d0350ec
+		lineageTag: 111830ac-49de-4af1-871b-f11c6f53165c
 		summarizeBy: none
 		sourceColumn: true_class
 
@@ -26,7 +26,7 @@ table score_distribution
 	column band_order
 		dataType: int64
 		isHidden
-		lineageTag: 5933d4dd-116c-4b50-8c15-e8d4912550b3
+		lineageTag: b8ce2882-2c4f-4fc1-b448-8ff2d970296b
 		summarizeBy: none
 		sourceColumn: band_order
 
@@ -34,7 +34,7 @@ table score_distribution
 
 	column risk_band
 		dataType: string
-		lineageTag: ef426f58-e1ea-4aa8-9aa0-40f8a6013e1f
+		lineageTag: 14262602-ac57-4244-80c9-4c1c04d70301
 		summarizeBy: none
 		sourceColumn: risk_band
 		sortByColumn: band_order
@@ -43,7 +43,7 @@ table score_distribution
 
 	column urls
 		dataType: int64
-		lineageTag: 13ac064f-18a0-4d44-a680-440ee78462f0
+		lineageTag: e267b21c-5b66-44d9-86dd-eead53de83d6
 		summarizeBy: sum
 		sourceColumn: urls
 

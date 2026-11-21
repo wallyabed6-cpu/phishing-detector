@@ -1,9 +1,9 @@
 table dim_model
-	lineageTag: 826359b4-9221-40f4-92a7-76f3a6e01cbd
+	lineageTag: 34c7b3d7-0d10-43f5-8e86-b21f1585d2fb
 
 	column model
 		dataType: string
-		lineageTag: 587eed53-6fd9-4604-a14c-81f6f465a52c
+		lineageTag: 9812f89b-58f5-4085-b74e-b484e364906c
 		summarizeBy: none
 		sourceColumn: model
 
@@ -11,7 +11,7 @@ table dim_model
 
 	column model_label
 		dataType: string
-		lineageTag: f1d72f20-0a2e-4783-9c16-bacfaca373e8
+		lineageTag: 8dd534e0-1fae-41aa-983f-31c424f974c6
 		summarizeBy: none
 		sourceColumn: model_label
 		sortByColumn: sort_order
@@ -20,7 +20,7 @@ table dim_model
 
 	column description
 		dataType: string
-		lineageTag: e21d1aa0-3bd7-4497-bcc7-bde411fabe49
+		lineageTag: 11488a5b-eb73-4c97-b1c7-92d8bddbf1a6
 		summarizeBy: none
 		sourceColumn: description
 
@@ -29,7 +29,7 @@ table dim_model
 	column sort_order
 		dataType: int64
 		isHidden
-		lineageTag: 2642f3b9-8777-4548-bf9c-be7d6c738868
+		lineageTag: e21dac9e-a21d-4a68-8c0d-fd650118554b
 		summarizeBy: none
 		sourceColumn: sort_order
 
@@ -37,7 +37,7 @@ table dim_model
 
 	column n_features
 		dataType: int64
-		lineageTag: 85b87f8b-d96d-4b4e-aacc-8d61d2ba350d
+		lineageTag: 8683e885-ac20-494c-85a4-3ea46b8b92b2
 		summarizeBy: none
 		sourceColumn: n_features
 

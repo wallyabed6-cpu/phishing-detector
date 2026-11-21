@@ -1,15 +1,15 @@
 table errors
-	lineageTag: 720dbc48-8146-4bab-8872-5638fabb3085
+	lineageTag: 39376739-a5f5-479e-9700-9bb5377f353b
 
 	/// test URLs the approach got wrong
 	measure 'Error Count' = COUNTROWS ( errors )
 		formatString: #,0
-		lineageTag: 5ae4ee96-6fa4-4fc8-9c2e-0a6c1159b198
+		lineageTag: 7808116b-ad4c-4745-9aee-0b7976658698
 
 	column model
 		dataType: string
 		isHidden
-		lineageTag: a9907414-a32c-42d7-8b08-1a41a906bc35
+		lineageTag: 63cfb66a-28cc-4e8b-882e-f4014296a98a
 		summarizeBy: none
 		sourceColumn: model
 
@@ -17,7 +17,7 @@ table errors
 
 	column url
 		dataType: string
-		lineageTag: dd61ddd6-d1c9-4ecd-8e2b-f272380fdae9
+		lineageTag: f7eb0075-9c23-4c9b-b16b-c63b4bc4ccab
 		summarizeBy: none
 		sourceColumn: url
 
@@ -25,7 +25,7 @@ table errors
 
 	column error_type
 		dataType: string
-		lineageTag: 0b6e015a-c1df-4062-8cbb-7c3fdfc53f61
+		lineageTag: 48da4bf3-74ae-4f78-8915-6318cf948b13
 		summarizeBy: none
 		sourceColumn: error_type
 
@@ -33,7 +33,7 @@ table errors
 
 	column true_class
 		dataType: string
-		lineageTag: 5b82ea54-e697-438f-aa67-a140bf8095f5
+		lineageTag: de50b477-7a77-4253-9a7b-81500546a83a
 		summarizeBy: none
 		sourceColumn: true_class
 
@@ -41,7 +41,7 @@ table errors
 
 	column risk_score
 		dataType: double
-		lineageTag: 3f280599-0779-47d3-9121-e09e90c783a5
+		lineageTag: 97f25d6c-9dff-4b4f-ab39-e908ed1d4f06
 		summarizeBy: none
 		sourceColumn: risk_score
 
@@ -49,7 +49,7 @@ table errors
 
 	column is_https
 		dataType: int64
-		lineageTag: 69b1558c-4338-4b5a-940e-d8def62a3927
+		lineageTag: 292f3552-83fa-4579-8772-310111ad4a6e
 		summarizeBy: none
 		sourceColumn: is_https
 
@@ -57,7 +57,7 @@ table errors
 
 	column url_length
 		dataType: int64
-		lineageTag: c0637967-714d-42aa-81c7-f9ebcc268790
+		lineageTag: 8ff27dc9-fb7f-457d-aab0-67b801fcf144
 		summarizeBy: none
 		sourceColumn: url_length
 
@@ -65,7 +65,7 @@ table errors
 
 	column url_similarity_index
 		dataType: double
-		lineageTag: dca5bfa6-d22a-41bd-aaa3-0c6b8c2c2126
+		lineageTag: 3cb3ea86-dd4d-421b-b672-9f334b455511
 		summarizeBy: none
 		sourceColumn: url_similarity_index
 

@@ -224,11 +224,28 @@
                   "Value": "false"
                 }
               }
-            },
-            "axisScale": {
+            }
+          }
+        }
+      ],
+      "labels": [
+        {
+          "properties": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "'log'"
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#242424'"
+                    }
+                  }
                 }
               }
             }
@@ -250,7 +267,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'URL-only model: risk scores by true class'"
+                  "Value": "'URL-only model: the uncertain middle (risk score 0.1\u20130.9)'"
                 }
               }
             }
@@ -270,7 +287,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Log scale. Almost every URL gets a confident score near 0 or 1; the middle bands are the hard cases.'"
+                  "Value": "'Only 510 of 47,159 test URLs (1.1%) land here; the rest score below 0.1 or above 0.9.'"
                 }
               }
             }
@@ -325,6 +342,109 @@
                       {
                         "Literal": {
                           "Value": "'url_only'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      },
+      {
+        "name": "middle_only",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "score_distribution"
+              }
+            },
+            "Property": "band_order"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "t",
+              "Entity": "score_distribution",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "t"
+                          }
+                        },
+                        "Property": "band_order"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "1L"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "2L"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "3L"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "4L"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "5L"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "6L"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "7L"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "8L"
                         }
                       }
                     ]

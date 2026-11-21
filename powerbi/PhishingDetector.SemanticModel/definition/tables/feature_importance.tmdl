@@ -1,15 +1,15 @@
 table feature_importance
-	lineageTag: 3f938c74-2623-4bcf-9987-02df1ef20c73
+	lineageTag: a16a6400-b447-4cf1-8a4d-256467bd64a0
 
 	/// share of the model's splitting power from a feature (sums to 100 per model)
 	measure 'Importance %' = SUM ( feature_importance[importance_pct] )
 		formatString: 0.0
-		lineageTag: 3190ff28-1b73-49cb-bde7-1fb1b9e97d68
+		lineageTag: cd8a1c6b-9a09-4f93-9b41-c2f949837be7
 
 	column model
 		dataType: string
 		isHidden
-		lineageTag: c446a92a-1c42-4cfe-9a54-3bcac959afea
+		lineageTag: d116435a-8305-4f79-8259-847e61b4312d
 		summarizeBy: none
 		sourceColumn: model
 
@@ -17,7 +17,7 @@ table feature_importance
 
 	column rank
 		dataType: int64
-		lineageTag: d1638690-2126-4647-8959-6a3fe67594cf
+		lineageTag: 52447b4a-cce7-4481-b419-15d38f409c23
 		summarizeBy: none
 		sourceColumn: rank
 
@@ -25,7 +25,7 @@ table feature_importance
 
 	column feature
 		dataType: string
-		lineageTag: f57bc21f-6fb8-4f0a-8a00-2989987ebd4d
+		lineageTag: a62c8302-f338-46ae-9f53-db3460f90cb0
 		summarizeBy: none
 		sourceColumn: feature
 
@@ -33,7 +33,7 @@ table feature_importance
 
 	column importance_pct
 		dataType: double
-		lineageTag: 1238424d-f54b-4dd2-99dc-e4bea2b49982
+		lineageTag: 37fc2984-aed1-43c7-bfda-66c0396d4b69
 		summarizeBy: sum
 		sourceColumn: importance_pct
 
@@ -41,7 +41,7 @@ table feature_importance
 
 	column feature_group
 		dataType: string
-		lineageTag: aed1bfc1-1834-4a6a-91d9-30db93f4dc62
+		lineageTag: d26bc481-6aab-4c3a-8bfd-af94e43aeebb
 		summarizeBy: none
 		sourceColumn: feature_group
 

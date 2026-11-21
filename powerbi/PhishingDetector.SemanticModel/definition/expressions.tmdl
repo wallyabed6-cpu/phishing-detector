@@ -1,5 +1,5 @@
 expression DataFolder = "C:\Users\wally\phishing-detector\exports\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-	lineageTag: 7a16b677-d4fd-464b-a793-4f2e633a00fc
+	lineageTag: 1716d6b4-a4c8-488e-9a51-9d6811a4489d
 
 	annotation PBI_ResultType = Text
 
